@@ -28,7 +28,6 @@ then
     echo "Aborting..."
     exit 1
 fi
-
 # Verify that $SHELL_PROFILE is pointing to the proper file
 read -r -p "Is $SHELL_PROFILE your shell profile? [y/N] " response
 if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]
@@ -65,6 +64,24 @@ fi
 
 if [[ -d $HOME/scripts ]];
 then
+    # Create jupyspark.sh script in your scripts folder
+    read -r -p "Would you like to create the jupyspark.sh script for launching a local jupyter spark server? [y/N] " response
+    if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
+        echo "#!/bin/bash
+        export PYSPARK_DRIVER_PYTHON=jupyter
+        export PYSPARK_DRIVER_PYTHON_OPTS=\"notebook --NotebookApp.open_browser=True --NotebookApp.ip='localhost' --NotebookApp.port=8888\"
+        \${SPARK_HOME}/bin/pyspark \
+        --master local[4] \
+        --executor-memory 1G \
+        --driver-memory 1G \
+        --conf spark.sql.warehouse.dir=\"file:///tmp/spark-warehouse\" \
+        --packages com.databricks:spark-csv_2.11:1.5.0 \
+        --packages com.amazonaws:aws-java-sdk-pom:1.10.34 \
+        --packages org.apache.hadoop:hadoop-aws:2.7.3" > $HOME/scripts/jupyspark.sh
+
+        chmod +x $HOME/scripts/jupyspark.sh
+    fi
+
     # Create localsparksubmit.sh script in your scripts folder
     read -r -p "Would you like to create the localsparksubmit.sh script for submittiing local python scripts through spark-submit? [y/N] " response
     if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
